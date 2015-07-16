@@ -17,7 +17,7 @@ activity <- read.csv("activity.csv")
 
 
 ```r
-#summing steps taken per day
+# summing steps taken per day
 
 total_steps <- tapply(activity$steps,activity$date,sum) 
 total_steps 
@@ -49,12 +49,16 @@ total_steps
 ```
 
 ```r
+# plotting steps date histogram
+
 hist(total_steps, main = "Histogram of Total Steps Per Day", xlab="Steps", ylab="Frequency")
 ```
 
-![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
+![plot of chunk histogram and step stats](figure/histogram and step stats-1.png) 
 
 ```r
+# calculating the steps mean and median
+
 steps_mean <- mean(total_steps,na.rm=TRUE)
 steps_mean
 ```
@@ -72,16 +76,21 @@ steps_median
 ## [1] 10765
 ```
 The mean is 1.0766189 &times; 10<sup>4</sup> the median is 10765
+
 ## What is the average daily activity pattern?
 
 
 ```r
-# finding mean over interval without NAs
+# finding steps mean over interval without NAs
 mean_interval <- tapply(activity$steps,activity$interval,mean,na.rm = TRUE)
-plot(as.numeric(names(mean_interval)),mean_interval,xlab="Time(mins)",ylab="Mean Number of Steps")
+plot(as.numeric(names(mean_interval)),
+     mean_interval,
+     type = "l",
+     xlab="Time(mins)",
+     ylab="Mean Number of Steps")
 ```
 
-![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+![plot of chunk Finding steps mean over interval](figure/Finding steps mean over interval-1.png) 
 
 ```r
 # Finding interval where max occurs
@@ -97,21 +106,6 @@ mean_interval[which(mean_interval==max(mean_interval), arr.ind=TRUE)]
 
 
 ```r
-summary(activity)
-```
-
-```
-##      steps                date          interval     
-##  Min.   :  0.00   2012-10-01:  288   Min.   :   0.0  
-##  1st Qu.:  0.00   2012-10-02:  288   1st Qu.: 588.8  
-##  Median :  0.00   2012-10-03:  288   Median :1177.5  
-##  Mean   : 37.38   2012-10-04:  288   Mean   :1177.5  
-##  3rd Qu.: 12.00   2012-10-05:  288   3rd Qu.:1766.2  
-##  Max.   :806.00   2012-10-06:  288   Max.   :2355.0  
-##  NA's   :2304     (Other)   :15840
-```
-
-```r
 # Indexing NAs
 na_index <- which(activity$steps %in% NA)   
 # Repeating mean interval for each day
@@ -122,10 +116,11 @@ activity_imp <- activity
 # replacing NAs with mean for interval
 activity_imp$steps <- replace(activity$steps,na_index,ext_mean_interval)   
 total_steps_imp <- tapply(activity_imp$steps,activity_imp$date,sum)
+# replotting histogram and averages with imputted values
 hist(total_steps_imp, main = "Histogram of Total Steps Per Day", xlab="Steps", ylab="Frequency")
 ```
 
-![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+![plot of chunk Imputting missing values](figure/Imputting missing values-1.png) 
 
 ```r
 steps_mean_imp <- mean(total_steps_imp)
@@ -167,7 +162,10 @@ total_steps_imp_df <- c(total_steps_imp[,1],total_steps_imp[,2])
 Day2 <- c(rep("weekday",length(total_steps_imp[,2])),rep("weekend",length(total_steps_imp[,2])))
 plot_df <- data.frame(interval,total_steps_imp_df,Day2)
 library(lattice)
-xyplot(total_steps_imp_df ~ interval | Day2, data = plot_df, layout = c(1,2))
+xyplot(total_steps_imp_df ~ interval | Day2, 
+       data = plot_df, 
+       layout = c(1,2),
+       type = "l")
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
+![plot of chunk looking at differences between weekdays and weekends](figure/looking at differences between weekdays and weekends-1.png) 

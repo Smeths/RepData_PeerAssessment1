@@ -8,38 +8,48 @@ output:
 
 ## Loading and preprocessing the data
 
-```{r echo = TRUE}
+```{r "loading and preprocessing", echo = TRUE}
 activity <- read.csv("activity.csv")
 ```
 
 ## What is mean total number of steps taken per day?
 
-```{r echo = TRUE}
-#summing steps taken per day
+```{r "histogram and step stats", echo = TRUE}
+# summing steps taken per day
 
 total_steps <- tapply(activity$steps,activity$date,sum) 
 total_steps 
+
+# plotting steps date histogram
+
 hist(total_steps, main = "Histogram of Total Steps Per Day", xlab="Steps", ylab="Frequency")
+
+# calculating the steps mean and median
+
 steps_mean <- mean(total_steps,na.rm=TRUE)
 steps_mean
 steps_median <- median(total_steps,na.rm=TRUE)
 steps_median
 ```
 The mean is `r steps_mean` the median is `r steps_median`
+
 ## What is the average daily activity pattern?
 
-```{r echo = TRUE}
-# finding mean over interval without NAs
+```{r "Finding steps mean over interval", echo = TRUE}
+# finding steps mean over interval without NAs
 mean_interval <- tapply(activity$steps,activity$interval,mean,na.rm = TRUE)
-plot(as.numeric(names(mean_interval)),mean_interval,xlab="Time(mins)",ylab="Mean Number of Steps")
+plot(as.numeric(names(mean_interval)),
+     mean_interval,
+     type = "l",
+     xlab="Time(mins)",
+     ylab="Mean Number of Steps")
 # Finding interval where max occurs
 mean_interval[which(mean_interval==max(mean_interval), arr.ind=TRUE)]
 ```
 
 ## Imputing missing values
 
-```{r echo = TRUE}
-summary(activity)
+```{r "Imputting missing values", echo = TRUE}
 # Indexing NAs
 na_index <- which(activity$steps %in% NA)   
 # Repeating mean interval for each day
@@ -50,6 +60,7 @@ activity_imp <- activity
 # replacing NAs with mean for interval
 activity_imp$steps <- replace(activity$steps,na_index,ext_mean_interval)   
 total_steps_imp <- tapply(activity_imp$steps,activity_imp$date,sum)
+# replotting histogram and averages with imputted values
 hist(total_steps_imp, main = "Histogram of Total Steps Per Day", xlab="Steps", ylab="Frequency")
 steps_mean_imp <- mean(total_steps_imp)
 steps_mean_imp
@@ -59,7 +70,7 @@ steps_median_imp
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r echo = TRUE}
+```{r "looking at differences between weekdays and weekends", echo = TRUE}
 # Finding weekday names
 Day <- weekdays(strptime(activity_imp$date,format="%Y-%m-%d"))
 # Indexing weekdays and weekends
@@ -78,5 +89,8 @@ total_steps_imp_df <- c(total_steps_imp[,1],total_steps_imp[,2])
 Day2 <- c(rep("weekday",length(total_steps_imp[,2])),rep("weekend",length(total_steps_imp[,2])))
 plot_df <- data.frame(interval,total_steps_imp_df,Day2)
 library(lattice)
-xyplot(total_steps_imp_df ~ interval | Day2, data = plot_df, layout = c(1,2))
+xyplot(total_steps_imp_df ~ interval | Day2, 
+       data = plot_df, 
+       layout = c(1,2),
+       type = "l")
 ```
